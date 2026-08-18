@@ -11,6 +11,8 @@ __pycache__/
 services/backend/.venv/
 env/
 services/backend/.env
+*.pdf
+services/backend/*.pdf
 
 # Logs e IDEs
 .vscode/
