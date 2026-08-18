@@ -3,7 +3,7 @@ apps/web/node_modules/
 apps/web/.next/
 apps/web/out/
 
-# Python / Backend
+# Python / Backend e outros
 __pycache__/
 *.py[cod]
 .venv/

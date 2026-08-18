@@ -17,7 +17,7 @@ def extraction_raw_text(pdf_path: str | Path) -> str:
     return "\n--- QUEBRA DE PAGINA ---\n".join(pages_text)
 
 if __name__ == "__main__":
-    test_file = Path("insira um pdf aqui") # Coloque um arquivo do tipo PDF aqui.
+    test_file = Path("PDF") # Coloque um arquivo do tipo PDF aqui.
 
     if test_file.exists():
         conteudo = extraction_raw_text(test_file)
