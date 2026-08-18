@@ -7,6 +7,8 @@ apps/web/out/
 __pycache__/
 *.py[cod]
 .venv/
+.venv/
+services/backend/.venv/
 env/
 services/backend/.env
 
