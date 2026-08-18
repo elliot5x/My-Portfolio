@@ -1,0 +1,16 @@
+# Node / Frontend
+apps/web/node_modules/
+apps/web/.next/
+apps/web/out/
+
+# Python / Backend
+__pycache__/
+*.py[cod]
+.venv/
+env/
+services/backend/.env
+
+# Logs e IDEs
+.vscode/
+.idea/
+*.log
