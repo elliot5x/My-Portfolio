@@ -2,5 +2,7 @@ fastapi
 uvicorn
 pdfplumber
 python-multipart
-google-generativeai
 python-dotenv
+spacy
+kagglehub
+httpx
