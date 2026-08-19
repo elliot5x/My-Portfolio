@@ -40,7 +40,6 @@ _PADROES_EXPERIENCIA = [
     re.compile(r'\bprofessional\b', re.IGNORECASE),
     re.compile(r'\bexperi[eê]ncias?\s*profissionais?\b', re.IGNORECASE),
     re.compile(r'\bexperi[eê]ncias?\b', re.IGNORECASE),
-    re.compile(r'\bexperi[eê]ncia\b', re.IGNORECASE),
     re.compile(r'\binternships?\b', re.IGNORECASE),
     re.compile(r'\best[aá]gios?\b', re.IGNORECASE),
 ]
@@ -156,18 +155,15 @@ def extrair_habilidades_por_secao(secoes: dict) -> list:
 
 def extrair_nome(linhas: list) -> str:
     ignorados = {
-        'contato', 'Contato', 'contact', 'profile', 'perfil', 'curriculum vitae', 
-        'cv', 'resume', 'resumé', 'résumé', 'currículo', 'curriculo', 'mobile',
-        'endereço', 'address', 'telefone', 'phone'
+        'contato', 'contato:', 'contact', 'profile', 'perfil', 'curriculum vitae', 
+        'cv', 'resume', 'resumé', 'résumé', 'currículo', 'curriculo'
     }
-    for candidato in linhas[:15]:
+    for candidato in linhas[:5]:
         limpo = candidato.strip()
         chave = limpo.lower().strip('.:')
-        if chave in ignorados or len(chave) <= 3:
+        if not limpo or chave in ignorados or len(chave) <= 2:
             continue
-        if '@' in limpo or ':' in limpo or re.search(r'\d', limpo):
-            continue
-        if eh_linha_de_cabecalho(limpo):
+        if '@' in limpo:
             continue
         return limpo
     return linhas[0] if linhas else ""

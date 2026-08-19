@@ -1,3 +1,3 @@
-### Gerador de portfólio
+# Gerador de portfólio
 
 Em construção...
