@@ -1,27 +1,19 @@
+import pdfplumber
 from pathlib import Path
-from pypdf import PdfReader
 
-def extraction_raw_text(pdf_path: str | Path) -> str:
+def extracao_padrao(pdf_path: str | Path) -> str:
     path = Path(pdf_path)
     if not path.exists():
         raise FileNotFoundError(f"Arquivo não encontrado: {path}")
 
-    reader = PdfReader(path)
-    pages_text = []
+    text_content = []
+    with pdfplumber.open(path) as pdf:
+        for page in pdf.pages:
+            text = page.extract_text()
+            if text:
+                text_content.append(text)
 
-    for index, page in enumerate(reader.pages):
-        text = page.extract_text()
-        if text:
-            pages_text.append(text)
+    return "\n--- QUEBRA DE PAGINA ---\n".join(text_content)
 
-    return "\n--- QUEBRA DE PAGINA ---\n".join(pages_text)
-
-if __name__ == "__main__":
-    test_file = Path("") # Coloque um arquivo do tipo PDF aqui.
-
-    if test_file.exists():
-        conteudo = extraction_raw_text(test_file)
-        print("=== TEXTO EXTRAÍDO COM SUCESSO ===")
-        print(conteudo[:500])
-    else:
-        print(f"Coloque um arquivo '{test_file.name}' em {Path.cwd()} para testar.")
+def extracao_linkedin(pdf_path: str | Path) -> str:
+    pass
