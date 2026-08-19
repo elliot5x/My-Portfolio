@@ -39,7 +39,7 @@ _PADROES_EXPERIENCIA = [
     re.compile(r'\bprofissiona(l|is)\b', re.IGNORECASE),
     re.compile(r'\bprofessional\b', re.IGNORECASE),
     re.compile(r'\bexperi[eê]ncias?\s*profissionais?\b', re.IGNORECASE),
-    re.compile(r'\bexperi[eê]ncia\b', re.IGNORECASE),
+    re.compile(r'\bexperi[eê]ncias?\b', re.IGNORECASE),
     re.compile(r'\binternships?\b', re.IGNORECASE),
     re.compile(r'\best[aá]gios?\b', re.IGNORECASE),
 ]
@@ -73,7 +73,6 @@ def eh_linha_de_cabecalho(linha: str) -> bool:
     todos_os_padroes = _PADROES_EXPERIENCIA + _PADROES_HABILIDADES
     if any(p.search(linha_lower) for p in todos_os_padroes) and len(linha.split()) <= 4:
         return True
-
     letras = [c for c in linha if c.isalpha()]
     if not letras:
         return False
@@ -172,12 +171,13 @@ def extrair_nome(linhas: list) -> str:
 
 def extrair_telefone(raw_text: str) -> str:
     rotulo = re.search(
-        r'(?:phone|tel(?:efone|\.)?|celular|mobile)\s*[:\-\/]?\s*(\(?\d{2}\)?\s*\d{4,5}[-.\s]?\d{4})',        raw_text, re.IGNORECASE
+        r'(?:phone|tel(?:efone|\.)?|celular|mobile)\s*[:\-\/]?\s*(\(?\d{2}\)?\s*\d{4,5}[-.\s]?\d{4})',
+        raw_text, re.IGNORECASE
     )
     if rotulo:
         return rotulo.group(1).strip().strip('/')
     
-    nacional = re.search(r'\b(?:[1-9]{2})\s?9?[0-9]{4}[-.\s]?[0-9]{4}\b', raw_text)
+    nacional = re.search(r'\b(?:\+?55\s?)?(?:\([1-9]{2}\)|[1-9]{2})\s?9?[0-9]{4}[-.\s]?[0-9]{4}\b', raw_text)
     if nacional:
         return nacional.group(0).strip()
         

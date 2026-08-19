@@ -8,7 +8,6 @@ import warnings
 
 warnings.filterwarnings("ignore")
 
-# treinamento_ner.py está em: backend/src/ml/treinamento_ner.py
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODEL_OUTPUT_DIR = BASE_DIR / "models" / "cv_ner_model_global"
 CORRECOES_PATH = BASE_DIR / "dataset" / "correcoes.jsonl"
@@ -64,6 +63,7 @@ def carregar_dados_kaggle(caminho_json):
             anotacoes = item.get('annotation')
             if not anotacoes:
                 continue
+            
             entidades_validas = _parsear_anotacoes(texto, anotacoes)
             if entidades_validas:
                 train_data.append((texto, {"entities": entidades_validas}))
@@ -71,8 +71,7 @@ def carregar_dados_kaggle(caminho_json):
 
 
 def carregar_dados_correcoes(caminho_jsonl: Path):
-    """Lê o arquivo de correções acumuladas (mesmo formato do dataset do
-    Kaggle) gerado por cv_parser.registrar_correcao_habilidades()."""
+    """Lê o arquivo de correções acumuladas gerado por cv_parser.registrar_correcao_habilidades()."""
     train_data = []
     if not caminho_jsonl.exists():
         return train_data
@@ -101,7 +100,7 @@ def treinar_modelo():
 
     train_data = carregar_dados_kaggle(caminho_json)
 
-    # Junta as correções acumuladas (currículos que erraram antes e foram revisados)
+    # Junta as correções acumuladas
     dados_correcoes = carregar_dados_correcoes(CORRECOES_PATH)
     if dados_correcoes:
         print(f"Incluindo {len(dados_correcoes)} exemplos de correção no treino.")
@@ -126,6 +125,7 @@ def treinar_modelo():
 
     MODEL_OUTPUT_DIR.mkdir(parents=True, exist_ok=True)
     nlp.to_disk(MODEL_OUTPUT_DIR)
+    print(f"[treinamento_ner] Modelo treinado e salvo em: {MODEL_OUTPUT_DIR}")
 
 
 if __name__ == "__main__":
