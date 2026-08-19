@@ -40,6 +40,7 @@ _PADROES_EXPERIENCIA = [
     re.compile(r'\bprofessional\b', re.IGNORECASE),
     re.compile(r'\bexperi[eê]ncias?\s*profissionais?\b', re.IGNORECASE),
     re.compile(r'\bexperi[eê]ncias?\b', re.IGNORECASE),
+    re.compile(r'\bexperi[eê]ncia\b', re.IGNORECASE),
     re.compile(r'\binternships?\b', re.IGNORECASE),
     re.compile(r'\best[aá]gios?\b', re.IGNORECASE),
 ]
@@ -68,6 +69,11 @@ def eh_linha_de_cabecalho(linha: str) -> bool:
         return False
     if linha.endswith(('.', ',', ';', ':')):
         return False
+        
+    linha_lower = linha.lower()
+    todos_os_padroes = _PADROES_EXPERIENCIA + _PADROES_HABILIDADES
+    if any(p.search(linha_lower) for p in todos_os_padroes) and len(linha.split()) <= 4:
+        return True
     letras = [c for c in linha if c.isalpha()]
     if not letras:
         return False
@@ -136,7 +142,8 @@ def _parece_item_de_lista(pedaco: str) -> bool:
 def extrair_habilidades_por_secao(secoes: dict) -> list:
     itens = []
     for titulo, linhas in secoes.items():
-        if any(p.search(titulo) for p in _PADROES_HABILIDADES):
+        titulo_lower = titulo.lower()
+        if any(p.search(titulo_lower) for p in _PADROES_HABILIDADES):
             for linha in linhas:
                 if ':' in linha:
                     linha = linha.split(':', 1)[1]
@@ -168,13 +175,13 @@ def extrair_nome(linhas: list) -> str:
 
 def extrair_telefone(raw_text: str) -> str:
     rotulo = re.search(
-        r'(?:phone|tel(?:efone|\.)?|celular|mobile)\s*[:\-]?\s*([+\d][\d\s().-]{6,}\d)',
+        r'(?:phone|tel(?:efone|\.)?|celular|mobile)\s*[:\-\/]?\s*(\(?\d{2}\)?\s*\d{4,5}[-.\s]?\d{4})',
         raw_text, re.IGNORECASE
     )
     if rotulo:
-        return rotulo.group(1).strip()
+        return rotulo.group(1).strip().strip('/')
     
-    nacional = re.search(r'\b(?:[1-9]{2})\s?9?[0-9]{4}[-.\s]?[0-9]{4}\b', raw_text)
+    nacional = re.search(r'\b(?:\+?55\s?)?(?:\([1-9]{2}\)|[1-9]{2})\s?9?[0-9]{4}[-.\s]?[0-9]{4}\b', raw_text)
     if nacional:
         return nacional.group(0).strip()
         
