@@ -3,6 +3,7 @@ from pathlib import Path
 from fastapi import FastAPI, UploadFile, File
 from fastapi.middleware.cors import CORSMiddleware
 
+from src.schemas.schemas import CurriculoResponse, GitHubResponse
 from src.parsers.pdf_reader import extracao_padrao
 from src.extraction.cv_parser import text_to_json
 from src.api.github_api import fetch_github_repos
@@ -28,7 +29,7 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-@app.post("/api/v1/curriculo/parse", tags=["Currículo"])
+@app.post("/api/v1/curriculo/parse", tags=["Currículo"], response_model=CurriculoResponse)
 async def upload_cv(file: UploadFile = File(...)):
     temp_path = Path(f"temp_{file.filename}")
     with temp_path.open("wb") as buffer:
@@ -42,7 +43,7 @@ async def upload_cv(file: UploadFile = File(...)):
         if temp_path.exists():
             temp_path.unlink()
 
-@app.get("/api/v1/github/repos", tags=["GitHub"])
+@app.get("/api/v1/github/repos", tags=["GitHub"], response_model=GitHubResponse)
 async def get_github_repos(username: str):
     repos = await fetch_github_repos(username)
     return {
