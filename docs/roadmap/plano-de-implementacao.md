@@ -43,7 +43,7 @@ Entregas:
 Dependências:
 
 - backlog técnico definido;
-- regras de branch e documentação definidas em `agents.md`;
+- regras de branch e documentação definidas em `AGENTS.md`;
 - `.gitignore` limpo e coerente.
 
 ### Fase 2 - Backend mínimo funcional
