@@ -11,4 +11,5 @@ Esta pasta reúne as tarefas e o contexto do projeto `MyPortfolio`.
 
 - [Backlog do Backend](./backlog-backend-fastapi.md)
 - [Visão do Produto](./visao-do-produto.md)
-
+- [Plano de Implementação](./plano-de-implementacao.md)
+- [Frontend Next.js + React](./frontend-next-react.md)
