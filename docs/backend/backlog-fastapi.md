@@ -29,7 +29,7 @@ Legenda:
 - Rota: `POST /api/v1/curriculo/parse`
 - Objetivo: extrair texto de currículos e perfis do LinkedIn.
 
-Status no código atual: parcial.
+Status no código atual: feito.
 
 Critérios de aceite:
 
@@ -43,7 +43,7 @@ Critérios de aceite:
 - Rota: `GET /api/v1/github/repos?username={user}`
 - Objetivo: buscar projetos públicos do usuário.
 
-Status no código atual: parcial.
+Status no código atual: feito.
 
 Critérios de aceite:
 
