@@ -89,3 +89,4 @@ Critérios de aceite:
 
 - Upload: `POST` multipart com PDF e resposta JSON com as seções do currículo.
 - GitHub: `GET` com o `@username` e resposta com a lista tratada de repositórios.
+

@@ -2,6 +2,22 @@
 
 Este documento define a direção do frontend do projeto `MyPortfolio`.
 
+## Status atual
+
+A base inicial do frontend já foi criada em `apps/web`, com:
+
+- `Next.js` configurado;
+- estrutura em `src/` com App Router;
+- páginas base para público, onboarding e dashboard;
+- endpoint de healthcheck;
+- estilos globais com identidade visual própria;
+- estrutura de pastas para componentes, libs e estilos dentro de `src/`.
+
+Validação atual:
+
+- `npm run build` aprovado
+- `npm run lint` aprovado
+
 ## Objetivo
 
 Construir uma interface pública e um painel interno para:
@@ -29,20 +45,22 @@ Construir uma interface pública e um painel interno para:
 
 ```txt
 apps/web/
-  app/
-    (public)/
-    (dashboard)/
-    api/
-  components/
-    ui/
-    forms/
-    cards/
-    layout/
-  lib/
-    api/
-    hooks/
-    utils/
-  styles/
+  src/
+    app/
+      (marketing)/
+      (workspace)/
+      api/
+    components/
+      ui/
+    features/
+      onboarding/
+      dashboard/
+      portfolio/
+    lib/
+      api/
+      hooks/
+      utils/
+    styles/
   public/
 ```
 
@@ -147,4 +165,3 @@ Concentrar tokens visuais, temas e estilos globais.
 
 Essa documentação existe para o frontend não virar um conjunto solto de telas.
 Se a estrutura mudar, este arquivo deve ser atualizado junto.
-
