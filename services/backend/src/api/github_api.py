@@ -1,7 +1,16 @@
+import re
 import httpx
 from fastapi import HTTPException, status
 
+USERNAME_PATTERN = re.compile(r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$')
+
 async def fetch_github_repos(username: str) -> list[dict]:
+    if not USERNAME_PATTERN.match(username):
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Nome de usuário do GitHub inválido."
+        )
+
     url = f"https://api.github.com/users/{username}/repos?sort=updated&direction=desc"    
     headers = {
         "Accept": "application/vnd.github+json",
@@ -22,7 +31,6 @@ async def fetch_github_repos(username: str) -> list[dict]:
             response.raise_for_status()
             repos_raw = response.json()
 
-            # Filtra apenas os dados relevantes para exibição no portfólio (Aberto para mudanças :P)
             sanitized_repos = [
                 {
                     "name": repo.get("name"),
@@ -42,7 +50,7 @@ async def fetch_github_repos(username: str) -> list[dict]:
         except httpx.HTTPStatusError as exc:
             raise HTTPException(
                 status_code=exc.response.status_code,
-                detail=f"Erro retornado pela API do GitHub: {exc.response.text}"
+                detail="Erro ao consultar a API do GitHub."
             )
         except httpx.RequestError as exc:
             raise HTTPException(

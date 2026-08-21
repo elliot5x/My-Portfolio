@@ -8,3 +8,4 @@ kagglehub
 pytest
 httpx
 httpx2
+slowapi
