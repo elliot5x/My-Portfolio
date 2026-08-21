@@ -1,6 +1,8 @@
 import pdfplumber
 from pathlib import Path
 
+MAX_PAGINAS = 20
+
 def extrair_texto_base(pdf_path: str | Path) -> str:
     path = Path(pdf_path)
     if not path.exists():
@@ -8,6 +10,10 @@ def extrair_texto_base(pdf_path: str | Path) -> str:
 
     text_content = []
     with pdfplumber.open(path) as pdf:
+        if len(pdf.pages) > MAX_PAGINAS:
+            raise ValueError(
+                f"PDF tem {len(pdf.pages)} páginas; limite máximo é {MAX_PAGINAS}."
+            )
         for page in pdf.pages:
             text = page.extract_text()
             if text:
