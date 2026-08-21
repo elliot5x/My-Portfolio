@@ -1,8 +1,11 @@
+import os
 import re
 import httpx
 from fastapi import HTTPException, status
 
 USERNAME_PATTERN = re.compile(r'^[a-zA-Z0-9]([a-zA-Z0-9-]{0,37}[a-zA-Z0-9])?$')
+
+GITHUB_TOKEN = os.getenv("GITHUB_TOKEN")
 
 async def fetch_github_repos(username: str) -> list[dict]:
     if not USERNAME_PATTERN.match(username):
