@@ -14,9 +14,6 @@ CORRECOES_PATH = BASE_DIR / "dataset" / "correcoes.jsonl"
 
 
 def _parsear_anotacoes(texto: str, anotacoes: list) -> tuple:
-    """Extrai (inicio, fim, label) válidos e sem sobreposição de uma lista
-    de anotações no formato dataturks. Usado tanto pro dataset do Kaggle
-    quanto pro arquivo de correções."""
     entidades_temp = []
     for ent in anotacoes:
         label_list = ent.get('label')
@@ -71,7 +68,6 @@ def carregar_dados_kaggle(caminho_json):
 
 
 def carregar_dados_correcoes(caminho_jsonl: Path):
-    """Lê o arquivo de correções acumuladas gerado por cv_parser.registrar_correcao_habilidades()."""
     train_data = []
     if not caminho_jsonl.exists():
         return train_data
@@ -100,7 +96,6 @@ def treinar_modelo():
 
     train_data = carregar_dados_kaggle(caminho_json)
 
-    # Junta as correções acumuladas
     dados_correcoes = carregar_dados_correcoes(CORRECOES_PATH)
     if dados_correcoes:
         print(f"Incluindo {len(dados_correcoes)} exemplos de correção no treino.")
