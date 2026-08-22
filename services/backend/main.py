@@ -17,7 +17,7 @@ from src.api.github_api import fetch_github_repos
 limiter = Limiter(key_func=get_remote_address)
 
 app = FastAPI(
-    title="MyPortfolio API",
+    title="My-Portfolio API",
     description="API para parsing de currículo LinkedIn e integração com GitHub para geração de portfólios",
     version="1.0.0",
     docs_url="/docs",
