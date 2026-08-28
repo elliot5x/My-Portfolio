@@ -110,22 +110,37 @@ services/backend/
     extraction/
     ml/
     parsers/
+    recomendacao/
+    schemas/
 ```
 
 ### O que vai em cada pasta
 
 - `main.py`
-  - ponto de entrada da API FastAPI
-  - registra rotas e middleware
+  - ponto de entrada da API FastAPI, registro de rotas, middlewares, CORS e rate limit
 - `src/api/`
-  - integrações externas e adaptadores de API
-  - ex.: GitHub
+  - integrações externas e adaptadores de API (ex.: consulta à API pública do GitHub)
 - `src/extraction/`
-  - extração e normalização de dados do currículo
+  - extração, catalogação e normalização de dados do currículo via regex, catálogo de skills e NLP
 - `src/parsers/`
-  - leitura de arquivos, como PDF
+  - leitura e extração de texto bruto de arquivos (ex.: PDF com pdfplumber)
 - `src/ml/`
-  - scripts de treino e apoio ao modelo de NER
+  - scripts de treino e dados de suporte para o modelo de NER (Spacy)
+- `src/recomendacao/`
+  - motor de regras (`personalizador.py`): cruza linguagens do Git com habilidades do CV, calcula scores de repositórios e infere a área de atuação
+- `src/schemas/`
+  - contratos de dados e validação de entrada/saída usando Pydantic
+
+### Arquitetura e Funcionamento dos Endpoints (Stateless)
+
+A API foi desenhada para operar **100% stateless** (sem persistência em banco de dados). O processamento ocorre em memória a cada chamada:
+
+1. **`POST /api/v1/curriculo/parse`**
+   - Recebe o PDF via upload, valida magic bytes e tamanho, extrai o texto e retorna o JSON estruturado (`nome`, `email`, `telefone`, `habilidades`, `experiencias`).
+2. **`GET /api/v1/github/repos?username={username}`**
+   - Consulta a API do GitHub, filtra forks e repositórios irrelevantes, devolvendo a lista sanitizada com linguagens, estrelas e forks.
+3. **`POST /api/v1/personalizacao/card`**
+   - Recebe no corpo da requisição o JSON combinado (`curriculo` + `repos`). O motor de recomendação cruza as fontes, separa skills confirmadas de skills apenas citadas, ranqueia os melhores repositórios e infere a área técnica do usuário para o card final.
 
 ## Documentação
 
@@ -279,4 +294,3 @@ Exemplos:
 
 Este guia existe para reduzir dúvida na hora de contribuir.
 Se a estrutura mudar, atualize este documento junto com o código.
-
