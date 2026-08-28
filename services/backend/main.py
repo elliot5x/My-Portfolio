@@ -9,10 +9,11 @@ from slowapi import Limiter, _rate_limit_exceeded_handler
 from slowapi.util import get_remote_address
 from slowapi.errors import RateLimitExceeded
 
-from src.schemas.schemas import CurriculoResponse, GitHubResponse
+from src.schemas.schemas import CurriculoResponse, GitHubResponse, PersonalizacaoRequest, PersonalizacaoResponse
 from src.parsers.pdf_reader import extracao_padrao
-from src.extraction.cv_parser import text_to_json
+from src.extraction.cv_parser import text_to_json, SKILL_CATEGORIA
 from src.api.github_api import fetch_github_repos
+from src.recomendacao.personalizador import gerar_personalizacao, definir_mapa_skill_area
 
 limiter = Limiter(key_func=get_remote_address)
 
@@ -26,6 +27,8 @@ app = FastAPI(
 
 app.state.limiter = limiter
 app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
+
+definir_mapa_skill_area(SKILL_CATEGORIA)  # inicializa o mapa skill->área uma vez, na subida
 
 origins = [
     "http://localhost:3000",
@@ -85,3 +88,9 @@ async def get_github_repos(request: Request, username: str):
         "total_repos": len(repos),
         "repos": repos
     }
+
+@app.post("/api/v1/personalizacao/card", tags=["Personalização"], response_model=PersonalizacaoResponse)
+@limiter.limit("15/minute")
+async def gerar_card_personalizado(request: Request, dados: PersonalizacaoRequest):
+    resultado = gerar_personalizacao(dados.curriculo, dados.repos)
+    return {"status": "sucesso", "dados": resultado}

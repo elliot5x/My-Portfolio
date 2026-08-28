@@ -25,3 +25,19 @@ class CurriculoData(BaseModel):
 class CurriculoResponse(BaseModel):
     status: str
     dados: CurriculoData
+
+class PersonalizacaoRequest(BaseModel):
+    curriculo: CurriculoData
+    repos: List[GitHubRepo]
+
+class CardPersonalizado(BaseModel):
+    area_inferida: Optional[str] = None
+    linguagens_mais_usadas: List[str] = []
+    skills_confirmadas: List[str] = []
+    skills_apenas_citadas: List[str] = []
+    melhores_repos: List[str] = []
+    editado_manualmente: bool = False
+
+class PersonalizacaoResponse(BaseModel):
+    status: str
+    dados: CardPersonalizado

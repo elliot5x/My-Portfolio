@@ -1,5 +1,6 @@
 import spacy
 import re
+import csv
 import json
 from pathlib import Path
 from datetime import datetime, timezone
@@ -7,6 +8,42 @@ from datetime import datetime, timezone
 BASE_DIR = Path(__file__).resolve().parent.parent.parent
 MODEL_PATH = BASE_DIR / "models" / "cv_ner_model_global"
 CORRECOES_PATH = BASE_DIR / "dataset" / "correcoes.jsonl"
+HABILIDADES_CSV_PATHS = [
+    BASE_DIR / "dataset" / "habilidades_skills_qualidades.csv",
+    BASE_DIR / "dataset" / "novas_habilidades_skills_qualidades.csv",
+    BASE_DIR / "dataset" / "habilidades_seguranca.csv",
+]
+
+_SKILLS_FALLBACK = [
+    'python', 'javascript', 'java', 'sql', 'git', 'linux', 'agile', 'scrum'
+]
+
+
+def carregar_habilidades_conhecidas(caminhos_csv: list[Path] = HABILIDADES_CSV_PATHS):
+    vistos = {}
+    categorias = {}
+    algum_encontrado = False
+
+    for caminho in caminhos_csv:
+        if not caminho.exists():
+            print(f"[cv_parser] AVISO: catálogo não encontrado em {caminho}, pulando.")
+            continue
+        algum_encontrado = True
+        with open(caminho, 'r', encoding='utf-8') as f:
+            for linha in csv.DictReader(f):
+                nome = (linha.get('habilidade_qualidade') or '').strip()
+                categoria = (linha.get('categoria') or '').strip()
+                if not nome:
+                    continue
+                chave = nome.lower()
+                vistos.setdefault(chave, nome)
+                categorias.setdefault(chave, categoria)
+
+    if not algum_encontrado:
+        print("[cv_parser] AVISO: nenhum catálogo de habilidades encontrado, usando lista mínima de fallback.")
+        return list(_SKILLS_FALLBACK), {}
+
+    return list(vistos.values()), categorias
 
 
 def carregar_modelo():
@@ -19,17 +56,7 @@ def carregar_modelo():
 
 nlp = carregar_modelo()
 
-SKILLS_CONHECIDAS = [
-    'python', 'javascript', 'java', 'c++', 'c#', 'ruby', 'go', 'rust', 'php', 'typescript',
-    'html', 'css', 'react', 'node.js', 'angular', 'vue', 'spring', 'django', 'flask', 'fastapi',
-    'machine learning', 'deep learning', 'big data', 'sql', 'nosql', 'mongodb',
-    'postgresql', 'mysql', 'redis', 'pandas', 'tensorflow',
-    'aws', 'azure', 'google cloud', 'gcp', 'docker', 'kubernetes', 'ci/cd',
-    'jenkins', 'terraform', 'ansible', 'git', 'github', 'gitlab',
-    'cibersegurança', 'cybersecurity', 'lgpd', 'gdpr', 'pentest', 'soc', 'siem',
-    'linux', 'bash', 'shell script', 'kali linux', 'debian', 'arch linux', 'firewall',
-    'project management', 'agile', 'scrum', 'kanban'
-]
+SKILLS_CONHECIDAS, SKILL_CATEGORIA = carregar_habilidades_conhecidas()
 
 _PADROES_EXPERIENCIA = [
     re.compile(r'\bexperiences?\b', re.IGNORECASE),
@@ -229,8 +256,8 @@ async def text_to_json(raw_text: str) -> dict:
 
     texto_minusculo = raw_text.lower()
     for skill in SKILLS_CONHECIDAS:
-        if re.search(rf'\b{re.escape(skill)}\b', texto_minusculo):
-            habilidades_extraidas.add(skill.title())
+        if re.search(rf'\b{re.escape(skill.lower())}\b', texto_minusculo):
+            habilidades_extraidas.add(skill)  # grafia original do catálogo (ex: "SQL", não "Sql")
 
     secoes = segmentar_secoes(raw_text)
     for l in extrair_blocos_experiencia(secoes):
