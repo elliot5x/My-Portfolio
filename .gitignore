@@ -3,11 +3,13 @@ node_modules/
 .next/
 out/
 dist/
+*.tsbuildinfo
 
 # Python / Backend e outros
 __pycache__/
 *.py[cod]
 .venv/
+.tools/
 env/
 .env
 .env.*

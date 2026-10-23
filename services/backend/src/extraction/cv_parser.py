@@ -135,6 +135,30 @@ def extrair_blocos_experiencia(secoes: dict) -> list:
     return linhas_coletadas
 
 
+_PADRAO_PERIODO = re.compile(
+    r'(?:\b(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-z]*[./-]?\s*\d{2,4}\b|\b\d{4}\b)\s*(?:-|–|—|a|até)\s*(?:\b(?:jan|fev|mar|abr|mai|jun|jul|ago|set|out|nov|dez)[a-z]*[./-]?\s*\d{2,4}\b|\b\d{4}\b|atual|presente)',
+    re.IGNORECASE,
+)
+
+
+def agrupar_experiencias(linhas: list[str]) -> list[str]:
+    """Agrupa cargo/período e suas atribuições, descartando o resumo antes do primeiro cargo."""
+    blocos = []
+    atual = []
+    encontrou_cargo = False
+    for linha in linhas:
+        if _PADRAO_PERIODO.search(linha):
+            if atual:
+                blocos.append("\n".join(atual))
+            atual = [linha]
+            encontrou_cargo = True
+        elif encontrou_cargo:
+            atual.append(linha)
+    if atual:
+        blocos.append("\n".join(atual))
+    return blocos or linhas
+
+
 def _dividir_respeitando_parenteses(linha: str) -> list:
     partes, atual, profundidade = [], [], 0
     for ch in linha:
@@ -260,7 +284,7 @@ async def text_to_json(raw_text: str) -> dict:
             habilidades_extraidas.add(skill)  # grafia original do catálogo (ex: "SQL", não "Sql")
 
     secoes = segmentar_secoes(raw_text)
-    for l in extrair_blocos_experiencia(secoes):
+    for l in agrupar_experiencias(extrair_blocos_experiencia(secoes)):
         if len(l) > 5:
             _add_experiencia(l)
     for item in extrair_habilidades_por_secao(secoes):

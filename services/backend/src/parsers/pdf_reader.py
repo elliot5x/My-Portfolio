@@ -15,7 +15,9 @@ def extrair_texto_base(pdf_path: str | Path) -> str:
                 f"PDF tem {len(pdf.pages)} páginas; limite máximo é {MAX_PAGINAS}."
             )
         for page in pdf.pages:
-            text = page.extract_text()
+            # A tolerância menor preserva espaços entre palavras em PDFs exportados
+            # por ferramentas de design e editores que posicionam cada caractere.
+            text = page.extract_text(x_tolerance=1, y_tolerance=3)
             if text:
                 text_content.append(text)
 

@@ -1,0 +1,15 @@
+{
+  "name": "my-portfolio",
+  "private": true,
+  "scripts": {
+    "dev": "concurrently --kill-others-on-fail --names web,api --prefix-colors blue,magenta \"npm --prefix apps/web run dev\" \"./scripts/dev-api.sh\"",
+    "dev:web": "npm --prefix apps/web run dev",
+    "dev:api": "./scripts/dev-api.sh",
+    "build": "npm --prefix apps/web run build",
+    "lint": "npm --prefix apps/web run lint",
+    "start": "npm --prefix apps/web run start"
+  },
+  "devDependencies": {
+    "concurrently": "^10.0.6"
+  }
+}

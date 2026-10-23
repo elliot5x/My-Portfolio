@@ -10,7 +10,7 @@ A base inicial do frontend já foi criada em `apps/web`, com:
 - estrutura em `src/` com App Router;
 - páginas base para público, onboarding e dashboard;
 - endpoint de healthcheck;
-- estilos globais com identidade visual própria;
+- Tailwind CSS v4 e `shadcn/ui` como base de componentes e tokens;
 - estrutura de pastas para componentes, libs e estilos dentro de `src/`.
 
 Validação atual:
@@ -32,6 +32,11 @@ Construir uma interface pública e um painel interno para:
 
 - `Next.js` para roteamento, páginas, layouts, metadata e renderização.
 - `React` para a composição da interface e organização dos componentes.
+- `Tailwind CSS v4` para layout e responsividade com utilitários.
+- `shadcn/ui` para componentes acessíveis e padronizados.
+- `Motion` para animações de entrada, interação e scroll.
+- Componentes selecionados do `Aceternity UI` para composições visuais de landing
+  page, integrados pelo registry do shadcn.
 - Integração com o backend FastAPI via HTTP.
 
 ## Por que essa stack
@@ -68,6 +73,11 @@ apps/web/
 
 - Separar páginas públicas e área autenticada/operacional.
 - Manter componentes pequenos e reutilizáveis.
+- Preferir componentes do `shadcn/ui` e utilitários Tailwind; não criar componentes
+  visuais paralelos com CSS próprio.
+- Manter apenas tokens globais do shadcn em `src/app/globals.css`.
+- Usar Motion e Aceternity com moderação: efeitos devem explicar o fluxo do produto
+  ou reforçar hierarquia visual, nunca substituir conteúdo real.
 - Isolar chamadas de API em uma camada própria.
 - Evitar lógica de negócio espalhada em componentes visuais.
 - Documentar decisões de interface que impactem o produto.
@@ -149,6 +159,21 @@ Concentrar tokens visuais, temas e estilos globais.
 - Consulta de repositórios por username.
 - Consumo de respostas JSON padronizadas.
 - Tratamento de erro amigável para o usuário final.
+
+## Foto de perfil e exportação
+
+- A foto escolhida no onboarding é reduzida no navegador para no máximo 640 px e salva como `data URL` no `localStorage`, junto aos demais dados da sessão.
+- Ela não é enviada ao backend nesta etapa.
+- A página de portfólio usa essa foto no cabeçalho e no PDF exportado.
+- O PDF é gerado no navegador a partir dos dados reais salvos: identificação, contato, competências, experiências e repositórios.
+- O onboarding também guarda o modo claro/escuro e a cor de destaque; a escolha é aplicada no portfólio e na exportação em PDF.
+- O usuário pode escolher entre as tipografias Space, Clean, Editorial e Mono. A escolha também é aplicada na exportação estática.
+- A ação `HTML + CSS` baixa um arquivo `.zip` com `index.html` e `styles.css`, incluindo dados reais, foto incorporada, cor, tema e tipografia selecionados.
+- Todos os repositórios públicos encontrados são exibidos. A pessoa pode ativar o modo de organização para mover cada repositório para cima ou para baixo; essa ordem é persistida e usada nas exportações.
+- No mesmo modo, a pessoa pode remover um repositório da seleção. Uma nova consulta ao GitHub pelo onboarding restaura a lista disponível.
+- Ao reabrir o onboarding, os dados já salvos são carregados novamente. Sem um novo PDF selecionado, competências e experiências existentes são preservadas.
+- Na página do portfólio, competências e experiências podem ser alteradas diretamente; a edição atualiza o mesmo registro no `localStorage`.
+- O backend preserva espaços durante a extração do PDF e agrupa cargo, período e atribuições em uma única experiência; o resumo profissional anterior ao primeiro cargo não entra nessa lista.
 
 ## Ordem de implementação sugerida
 

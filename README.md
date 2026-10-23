@@ -77,6 +77,14 @@ docker compose up --build
 
 ### Execução Manual (Serviços Separados)
 
+Depois de configurar o ambiente Python do backend uma vez, a forma mais simples de subir os dois serviços é, a partir da raiz:
+
+```bash
+npm run dev
+```
+
+Isso inicia o Next.js e a API FastAPI juntos. Se o Next escolher a porta `3001` porque a `3000` está ocupada, a API também aceita essa origem.
+
 #### Frontend (Next.js)
 
 ```bash

@@ -1,7 +1,10 @@
 import type { Metadata } from "next";
-import { IBM_Plex_Mono, Space_Grotesk } from "next/font/google";
+import { IBM_Plex_Mono, Space_Grotesk, Geist } from "next/font/google";
 import type { ReactNode } from "react";
 import "./globals.css";
+import { cn } from "@/lib/utils";
+
+const geist = Geist({subsets:['latin'],variable:'--font-sans'});
 
 const displayFont = Space_Grotesk({
   subsets: ["latin"],
@@ -28,7 +31,7 @@ export default function RootLayout({
   children: ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className={`${displayFont.variable} ${monoFont.variable}`}>
+    <html lang="pt-BR" className={cn(displayFont.variable, monoFont.variable, "font-sans", geist.variable)}>
       <body>{children}</body>
     </html>
   );

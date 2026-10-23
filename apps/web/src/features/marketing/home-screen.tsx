@@ -1,42 +1,51 @@
-import Link from "next/link";
-import { ButtonLink } from "../../components/ui/button";
-import { Card } from "../../components/ui/card";
+"use client";
 
-const highlights = [
-  "GitHub + currículo em um único fluxo",
-  "Curadoria rápida do que vai para o portfólio",
-  "Página pública com foco em performance e SEO"
-];
+import Link from "next/link";
+import dynamic from "next/dynamic";
+import { ArrowUpRight, Braces, Check, Code2, FileText, GitBranch, Layers3, PanelsTopLeft, Workflow } from "lucide-react";
+import { domAnimation, LazyMotion, m, useReducedMotion } from "motion/react";
+import { useEffect, useState } from "react";
+
+import { Badge } from "@/components/ui/badge";
+import { Button } from "@/components/ui/button";
+import { Card, CardContent } from "@/components/ui/card";
+import { ScrollReveal } from "@/components/scroll-reveal";
+import { Spotlight } from "@/components/ui/spotlight";
+import { PortfolioScreen } from "@/features/portfolio/portfolio-screen";
+import { type PortfolioData, portfolioStorageKey } from "@/lib/portfolio";
+
+const BackgroundBeams = dynamic(
+  () => import("@/components/ui/background-beams").then((module) => module.BackgroundBeams),
+  { ssr: false }
+);
 
 export function HomeScreen() {
-  return (
-    <main className="shell">
-      <section className="hero">
-        <p className="eyebrow">MyPortfolio</p>
-        <h1>Seu portfólio, organizado a partir do currículo e do GitHub.</h1>
-        <p className="lead">
-          Uma base para gerar identidade profissional com entrada de PDF, integração com
-          GitHub e publicação rápida em uma página pública elegante.
-        </p>
+  const [portfolio, setPortfolio] = useState<PortfolioData | null>(null);
+  const [forceLanding, setForceLanding] = useState(false);
+  const [showBeams, setShowBeams] = useState(false);
+  const reduceMotion = useReducedMotion();
 
-        <div className="actions">
-          <ButtonLink variant="primary" href="/onboarding">
-            Começar onboarding
-          </ButtonLink>
-          <Link className="button button-secondary" href="/dashboard">
-            Ver dashboard
-          </Link>
-        </div>
-      </section>
+  useEffect(() => {
+    const saved = window.localStorage.getItem(portfolioStorageKey);
+    const timer = window.setTimeout(() => {
+      setForceLanding(new URLSearchParams(window.location.search).get("landing") === "1");
+      if (saved) setPortfolio(JSON.parse(saved) as PortfolioData);
+    }, 0);
+    return () => window.clearTimeout(timer);
+  }, []);
 
-      <Card>
-        <h2>O que essa base já prepara</h2>
-        <ul className="feature-list">
-          {highlights.map((item) => (
-            <li key={item}>{item}</li>
-          ))}
-        </ul>
-      </Card>
-    </main>
-  );
+  useEffect(() => {
+    if (reduceMotion) return;
+    const frame = window.requestAnimationFrame(() => setShowBeams(true));
+    return () => window.cancelAnimationFrame(frame);
+  }, [reduceMotion]);
+
+  if (!portfolio || forceLanding) {
+    return <LazyMotion features={domAnimation}><main className="overflow-x-hidden bg-[#09090b] text-white"><section className="relative isolate min-h-svh overflow-hidden border-b border-white/10 px-4 sm:px-6"><Spotlight className="-top-40 left-0 motion-reduce:hidden md:-top-20 md:left-60" fill="#7c3aed" />{showBeams && <BackgroundBeams className="opacity-40 motion-reduce:hidden" />}<div className="relative z-10 mx-auto flex min-h-svh max-w-6xl flex-col justify-center py-24"><m.div initial={reduceMotion ? false : { opacity: 0, y: 24 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.55, ease: "easeOut" }} className="max-w-3xl"><Badge className="border border-white/15 bg-white/10 text-white hover:bg-white/10">MYPORTFOLIO / 01</Badge><h1 className="mt-7 text-5xl font-semibold tracking-[-0.06em] text-balance sm:text-7xl lg:text-8xl">Seu trabalho não cabe em um <span className="text-violet-300">template genérico.</span></h1><p className="mt-7 max-w-xl text-lg leading-8 text-zinc-400">Transforme currículo e GitHub em uma presença digital com a mesma intenção que você coloca no seu trabalho.</p><div className="mt-9 flex flex-wrap gap-3"><Button size="lg" className="bg-violet-500 text-white hover:bg-violet-400" asChild><Link href="/onboarding">Começar agora <ArrowUpRight /></Link></Button><Button size="lg" variant="outline" className="border-white/20 bg-white/5 text-white hover:bg-white/10 hover:text-white" asChild><a href="#processo">Explorar a experiência</a></Button></div></m.div><m.div initial={reduceMotion ? false : { opacity: 0, scale: 0.96, rotate: -2 }} animate={{ opacity: 1, scale: 1, rotate: -2 }} transition={{ delay: 0.18, duration: 0.5, ease: "easeOut" }} className="mt-16 max-w-xl self-end rounded-3xl border border-white/15 bg-zinc-950/85 p-5 shadow-2xl md:mt-0 md:absolute md:right-4 md:top-1/2 md:w-[29rem] md:-translate-y-1/2"><div className="flex items-center justify-between text-xs text-zinc-400"><span>PORTFOLIO.SOURCE</span><span className="size-2 rounded-full bg-emerald-400" /></div><div className="mt-5 grid grid-cols-[auto_1fr] gap-4"><div className="grid size-14 place-items-center rounded-2xl bg-violet-500/20 text-violet-300"><Braces /></div><div><p className="font-medium">Dados profissionais, organizados.</p><p className="mt-1 text-sm leading-6 text-zinc-400">Repositórios, experiência e competências se conectam em uma narrativa única.</p></div></div><div className="mt-5 flex items-center gap-2"><div className="grid size-16 place-items-center rounded-xl border border-violet-300/20 bg-violet-500/15 text-violet-200" title="Currículo"><FileText className="size-6" /></div><span className="h-px flex-1 bg-gradient-to-r from-violet-300/40 to-cyan-300/40" /><div className="grid size-16 place-items-center rounded-xl border border-fuchsia-300/20 bg-fuchsia-500/15 text-fuchsia-200" title="GitHub"><GitBranch className="size-6" /></div><span className="h-px flex-1 bg-gradient-to-r from-fuchsia-300/40 to-cyan-300/40" /><div className="grid size-16 place-items-center rounded-xl border border-cyan-300/20 bg-cyan-400/15 text-cyan-200" title="Portfólio"><PanelsTopLeft className="size-6" /></div></div><div className="mt-2 grid grid-cols-3 text-center text-[10px] font-medium tracking-wide text-zinc-500"><span>CURRÍCULO</span><span>GITHUB</span><span>PORTFÓLIO</span></div></m.div></div></section>
+      <section id="processo" className="relative isolate overflow-hidden bg-zinc-950 px-4 py-28 sm:px-6"><m.div aria-hidden className="absolute -left-32 top-24 size-96 rounded-full bg-violet-600/25 blur-3xl" animate={reduceMotion ? {} : { x: [0, 120, 0], y: [0, 70, 0], scale: [1, 1.2, 1] }} transition={{ duration: 12, repeat: Infinity, ease: "easeInOut" }} /><m.div aria-hidden className="absolute -right-32 bottom-0 size-[28rem] rounded-full bg-cyan-500/15 blur-3xl" animate={reduceMotion ? {} : { x: [0, -120, 0], y: [0, -100, 0], scale: [1, 1.15, 1] }} transition={{ duration: 14, repeat: Infinity, ease: "easeInOut" }} /><div className="relative z-10 mx-auto max-w-6xl"><ScrollReveal><div className="grid gap-6 lg:grid-cols-[1.3fr_0.7fr]"><div><p className="text-sm font-medium tracking-[0.2em] text-violet-300">DO BRUTO AO SEU</p><h2 className="mt-4 max-w-3xl text-4xl font-semibold tracking-[-0.05em] text-balance sm:text-6xl">Seu histórico ganha uma forma que parece sua.</h2></div><p className="self-end text-base leading-7 text-zinc-400">Você traz as evidências. Nós organizamos uma presença profissional que você controla do início ao fim.</p></div></ScrollReveal><div className="mt-14 grid gap-4 lg:grid-cols-[1fr_1fr_1.2fr]"><div className="space-y-4"><m.div whileHover={reduceMotion ? {} : { x: 6 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}><Card className="border-white/10 bg-white/5 text-white shadow-none"><CardContent className="flex gap-4 p-5"><span className="font-mono text-sm text-violet-300">01</span><div><FileText className="size-5 text-violet-300" /><p className="mt-4 font-medium">Currículo</p><p className="mt-1 text-sm leading-6 text-zinc-400">Experiências e competências entram como matéria-prima.</p></div></CardContent></Card></m.div><m.div whileHover={reduceMotion ? {} : { x: 6 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}><Card className="border-white/10 bg-white/5 text-white shadow-none"><CardContent className="flex gap-4 p-5"><span className="font-mono text-sm text-cyan-300">02</span><div><Code2 className="size-5 text-cyan-300" /><p className="mt-4 font-medium">GitHub</p><p className="mt-1 text-sm leading-6 text-zinc-400">Repositórios públicos mostram o trabalho em prática.</p></div></CardContent></Card></m.div></div><div className="flex items-center justify-center py-4 lg:py-0"><m.div initial={reduceMotion ? false : { opacity: 0, scale: 0.92 }} whileInView={{ opacity: 1, scale: 1 }} viewport={{ once: true, amount: 0.45 }} transition={{ duration: 0.45, ease: "easeOut" }} className="w-full max-w-52 rounded-2xl border border-violet-300/20 bg-violet-400/10 p-4 text-center shadow-[0_0_70px_-18px_rgba(139,92,246,0.8)]"><span className="mx-auto grid size-10 place-items-center rounded-full bg-violet-300 text-zinc-950"><Check className="size-5" strokeWidth={3} /></span><p className="mt-4 text-sm font-semibold text-white">Você revisa e aprova</p><p className="mt-2 text-xs leading-5 text-zinc-400">Nada é publicado sem a sua decisão.</p></m.div></div><div className="space-y-4"><m.div whileHover={reduceMotion ? {} : { x: -6 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}><Card className="border-white/10 bg-white/5 text-white shadow-none"><CardContent className="flex gap-4 p-5"><span className="font-mono text-sm text-fuchsia-300">03</span><div><Layers3 className="size-5 text-fuchsia-300" /><p className="mt-4 font-medium">Curadoria</p><p className="mt-1 text-sm leading-6 text-zinc-400">Você decide o que aparece e como contar a história.</p></div></CardContent></Card></m.div><m.div whileHover={reduceMotion ? {} : { x: -6 }} transition={{ type: "spring", stiffness: 300, damping: 22 }}><Card className="border-white/10 bg-white/5 text-white shadow-none"><CardContent className="flex gap-4 p-5"><span className="font-mono text-sm text-emerald-300">04</span><div><Workflow className="size-5 text-emerald-300" /><p className="mt-4 font-medium">Portfólio</p><p className="mt-1 text-sm leading-6 text-zinc-400">Uma página viva, pronta para circular com você.</p></div></CardContent></Card></m.div></div></div></div></section>
+      <section className="border-y border-white/10 bg-black px-4 py-24 sm:px-6"><ScrollReveal className="mx-auto max-w-6xl"><div className="grid gap-10 lg:grid-cols-[1fr_0.9fr] lg:items-end"><div><p className="font-mono text-xs tracking-[0.18em] text-violet-300">INÍCIO / 03</p><h2 className="mt-5 max-w-2xl text-4xl font-semibold tracking-[-0.05em] text-balance sm:text-6xl">Comece pelo que você já produziu.</h2><p className="mt-5 max-w-xl text-lg leading-8 text-zinc-400">Envie seu currículo, conecte o GitHub e escolha o que merece entrar na sua página.</p></div><div className="border-l border-white/15 pl-6 sm:pl-8"><div className="space-y-4 font-mono text-xs text-zinc-500"><div className="flex items-center justify-between border-b border-white/10 pb-4"><span>01 / CURRICULO.PDF</span><span className="text-violet-300">ADICIONAR</span></div><div className="flex items-center justify-between border-b border-white/10 pb-4"><span>02 / GITHUB.COM</span><span className="text-cyan-300">CONECTAR</span></div><div className="flex items-center justify-between border-b border-white/10 pb-4"><span>03 / SELEÇÃO</span><span className="text-emerald-300">REVISAR</span></div></div><Button size="lg" className="mt-8 bg-white text-zinc-950 hover:bg-zinc-200" asChild><Link href="/onboarding">Começar meu portfólio <ArrowUpRight /></Link></Button></div></div></ScrollReveal></section>
+    </main></LazyMotion>;
+  }
+
+  return <PortfolioScreen portfolio={portfolio} />;
 }
