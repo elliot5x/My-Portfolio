@@ -2,6 +2,7 @@
   "name": "my-portfolio",
   "private": true,
   "scripts": {
+    "setup": "./scripts/setup.sh",
     "dev": "concurrently --kill-others-on-fail --names web,api --prefix-colors blue,magenta \"npm --prefix apps/web run dev\" \"./scripts/dev-api.sh\"",
     "dev:web": "npm --prefix apps/web run dev",
     "dev:api": "./scripts/dev-api.sh",

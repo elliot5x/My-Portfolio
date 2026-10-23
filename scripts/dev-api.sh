@@ -8,7 +8,7 @@ python_bin="$backend_dir/.venv/bin/python"
 
 if [[ ! -x "$python_bin" ]]; then
   echo "Ambiente do backend não encontrado em services/backend/.venv."
-  echo "Crie-o e instale as dependências antes de executar npm run dev."
+  echo "Execute npm run setup antes de executar npm run dev."
   exit 1
 fi
 

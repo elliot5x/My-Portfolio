@@ -75,9 +75,17 @@ docker compose up --build
 
 ---
 
-### Execução Manual (Serviços Separados)
+### Primeira execução
 
-Depois de configurar o ambiente Python do backend uma vez, a forma mais simples de subir os dois serviços é, a partir da raiz:
+Na raiz do projeto, execute uma única vez:
+
+```bash
+npm run setup
+```
+
+O comando instala as dependências do Node.js, prepara um Python 3.12 isolado em `services/backend/.venv` e instala as dependências da API. Quando necessário, ele baixa o `uv` apenas para `services/backend/.tools`, sem alterar o Python global ou usar Docker.
+
+Depois, para subir os dois serviços:
 
 ```bash
 npm run dev
