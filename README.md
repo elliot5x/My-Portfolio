@@ -127,6 +127,63 @@ API disponível em: [http://localhost:8000](http://localhost:8000)
 
 ---
 
+## Como o Código Funciona (Arquitetura)
+
+O projeto é um monorepo com duas aplicações principais que conversam via HTTP:
+
+```
+My-Portfolio/
+├── apps/web/          → Frontend (Next.js 16 + React 19 + Tailwind 4)
+├── services/backend/  → Backend  (FastAPI + spaCy)
+├── scripts/           → setup.sh e dev-api.sh (orquestração local)
+├── docker-compose.yml → sobe os dois serviços em containers
+└── docs/              → documentação interna do projeto
+```
+
+### Backend — `services/backend/`
+
+A API expõe três endpoints principais em `main.py`, todos protegidos com rate limiting (slowapi) e CORS:
+
+| Endpoint | Método | O que faz |
+|---|---|---|
+| `/api/v1/curriculo/parse` | POST | Recebe o PDF do currículo (máx. 5 MB), valida os magic bytes `%PDF-`, extrai o texto e devolve um JSON estruturado |
+| `/api/v1/github/repos` | GET | Consulta a API do GitHub e retorna os repositórios públicos de um usuário |
+| `/api/v1/personalizacao/card` | POST | Cruza currículo + repositórios e gera os dados do card/portfólio personalizado |
+
+O pipeline de parsing do currículo é dividido em módulos dentro de `src/`:
+
+- **`src/parsers/pdf_reader.py`** — extrai o texto bruto do PDF (`extracao_padrao`), rodando em thread separada para não bloquear o event loop.
+- **`src/extraction/cv_parser.py`** — transforma o texto bruto em JSON (`text_to_json`) usando spaCy (NER) e a taxonomia `SKILL_CATEGORIA`, que classifica skills por área (frontend, backend, dados, etc.).
+- **`src/api/github_api.py`** — cliente assíncrono para buscar os repositórios do usuário no GitHub.
+- **`src/recomendacao/personalizador.py`** — merge inteligente: cruza as skills extraídas do currículo com as tecnologias dos repositórios (`gerar_personalizacao`) para montar o card final.
+- **`src/ml/treinamento_ner.py`** — treino/fine-tuning do modelo NER usado no parsing.
+- **`src/schemas/`** — modelos Pydantic de request/response (`CurriculoResponse`, `GitHubResponse`, `PersonalizacaoRequest/Response`).
+
+O mapa `skill → área` é inicializado uma única vez na subida da aplicação, e cada upload de PDF é gravado em arquivo temporário que é removido ao final do request.
+
+### Frontend — `apps/web/`
+
+Next.js com App Router, organizado por rotas e features:
+
+- **`(marketing)/`** — página inicial pública e o **onboarding**, onde o usuário envia o PDF do currículo e informa o usuário do GitHub.
+- **`(workspace)/`** — área logada do usuário:
+  - `dashboard/` — painel de curadoria (visibilidade de projetos, tecnologias e cargos).
+  - `portfolio/` — geração e visualização da página pública do portfólio e do card para o LinkedIn.
+- **`src/features/`** — as telas em si (`home-screen`, `onboarding-screen`, `dashboard-screen`, `portfolio-screen`), mantidas separadas das rotas para facilitar reuso.
+- **`src/app/api/health/`** — endpoint de health check do próprio app Next.
+
+Utilitários relevantes nas dependências: `jspdf` e `jszip` para geração/exportação de entregáveis, `motion` para animações e `radix-ui` + `shadcn` como base dos componentes.
+
+### Fluxo ponta a ponta
+
+1. Usuário acessa a home e entra no **onboarding**.
+2. O frontend envia o PDF para `POST /api/v1/curriculo/parse` → backend extrai e estrutura os dados do currículo.
+3. O frontend busca os repositórios em `GET /api/v1/github/repos?username=...`.
+4. Com os dois conjuntos de dados, chama `POST /api/v1/personalizacao/card`, que faz o cruzamento e devolve o portfólio personalizado.
+5. No **dashboard** o usuário ajusta o que será exibido e no **portfolio** visualiza/exporta o resultado.
+
+---
+
 ## Status do Projeto
 
 O projeto encontra-se atualmente em fase de testes (**Beta**). Instabilidades de parsing ou bugs de renderização podem ser reportados abrindo uma issue.

@@ -168,6 +168,9 @@ Concentrar tokens visuais, temas e estilos globais.
 - O PDF é gerado no navegador a partir dos dados reais salvos: identificação, contato, competências, experiências e repositórios.
 - O onboarding também guarda o modo claro/escuro e a cor de destaque; a escolha é aplicada no portfólio e na exportação em PDF.
 - O usuário pode escolher entre as tipografias Space, Clean, Editorial e Mono. A escolha também é aplicada na exportação estática.
+- O onboarding oferece os layouts Moderno e Editorial. O Editorial aplica composição monocromática com retrato, títulos em moldura e seções de trabalho/competências na página e na exportação HTML.
+- O modo claro/escuro também se aplica ao layout Editorial, à exportação HTML e a todas as páginas do PDF; essa escolha não altera a cor de destaque do layout Moderno.
+- A ação `Card rápido` gera uma imagem PNG 1200 × 630 com nome, resumo, até quatro competências, um projeto em destaque e o GitHub. Navegadores compatíveis abrem o compartilhamento nativo; nos demais, o PNG é baixado diretamente. Tema, layout, tipografia e foto seguem as escolhas do portfólio.
 - A ação `HTML + CSS` baixa um arquivo `.zip` com `index.html` e `styles.css`, incluindo dados reais, foto incorporada, cor, tema e tipografia selecionados.
 - Todos os repositórios públicos encontrados são exibidos. A pessoa pode ativar o modo de organização para mover cada repositório para cima ou para baixo; essa ordem é persistida e usada nas exportações.
 - No mesmo modo, a pessoa pode remover um repositório da seleção. Uma nova consulta ao GitHub pelo onboarding restaura a lista disponível.
