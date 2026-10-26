@@ -5,7 +5,7 @@ set -euo pipefail
 project_dir="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 backend_dir="$project_dir/services/backend"
 tools_dir="$backend_dir/.tools"
-uv_bin="$tools_dir/bin/uv"
+uv_bin="$tools_dir/uv"
 venv_dir="$backend_dir/.venv"
 
 command -v npm >/dev/null 2>&1 || {

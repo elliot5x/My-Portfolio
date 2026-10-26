@@ -8,8 +8,8 @@ function hexToRgb(hex: string): [number, number, number] {
   return [Number.parseInt(value.slice(0, 2), 16), Number.parseInt(value.slice(2, 4), 16), Number.parseInt(value.slice(4, 6), 16)];
 }
 
-function mixWithWhite(color: [number, number, number], whiteRatio: number): [number, number, number] {
-  return color.map((channel) => Math.round(channel + (255 - channel) * whiteRatio)) as [number, number, number];
+function mixColors(color: [number, number, number], target: [number, number, number], ratio: number): [number, number, number] {
+  return color.map((channel, index) => Math.round(channel + ((target[index] ?? 255) - channel) * ratio)) as [number, number, number];
 }
 
 async function createPdfAvatar(dataUrl: string) {
@@ -40,15 +40,37 @@ export async function exportPortfolioPdf(portfolio: PortfolioData) {
   const document = new jsPDF({ unit: "mm", format: "a4" });
   const pageWidth = document.internal.pageSize.getWidth();
   const pageHeight = document.internal.pageSize.getHeight();
-  const accent = hexToRgb(portfolio.appearance?.accent ?? "#8b5cf6");
+  const appearance = portfolio.appearance ?? { mode: "dark" as const, accent: "#8b5cf6" };
+  const isDark = appearance.mode === "dark";
+  const isEditorial = appearance.layout === "editorial";
+  const background: [number, number, number] = isEditorial
+    ? isDark ? [23, 23, 23] : [222, 221, 209]
+    : isDark ? [9, 9, 11] : [248, 250, 252];
+  const foreground: [number, number, number] = isEditorial
+    ? isDark ? [244, 241, 232] : [23, 21, 37]
+    : isDark ? [250, 250, 250] : [24, 24, 27];
+  const muted: [number, number, number] = isEditorial
+    ? isDark ? [184, 181, 172] : [85, 84, 79]
+    : isDark ? [161, 161, 170] : [82, 82, 91];
+  const surface: [number, number, number] = isEditorial
+    ? isDark ? [36, 36, 36] : [232, 231, 220]
+    : isDark ? [21, 21, 26] : [255, 255, 255];
+  const accent = isEditorial ? foreground : hexToRgb(appearance.accent);
+  const font = isEditorial || appearance.font === "mono" ? "courier" : appearance.font === "editorial" ? "times" : "helvetica";
+  const pageBackground = () => {
+    document.setFillColor(...background);
+    document.rect(0, 0, pageWidth, pageHeight, "F");
+  };
+  pageBackground();
   let cursorY = margin;
 
   const nextLine = (amount: number) => {
     if (cursorY + amount <= pageHeight - margin) return;
     document.addPage();
+    pageBackground();
     cursorY = margin;
   };
-  const write = (text: string, size = 10, color: [number, number, number] = [39, 39, 42]) => {
+  const write = (text: string, size = 10, color: [number, number, number] = foreground) => {
     document.setFontSize(size);
     document.setTextColor(...color);
     const lines = document.splitTextToSize(text, pageWidth - margin * 2);
@@ -65,15 +87,16 @@ export async function exportPortfolioPdf(portfolio: PortfolioData) {
     write(text.toUpperCase(), 11, accent);
   };
 
-  const headerColor = mixWithWhite(accent, 0.9);
-  document.setFillColor(248, 250, 252);
-  document.rect(0, 0, pageWidth, pageHeight, "F");
+  const headerColor = isEditorial ? surface : mixColors(accent, background, isDark ? 0.88 : 0.9);
   document.setFillColor(...headerColor);
-  document.roundedRect(12, 12, pageWidth - 24, 62, 7, 7, "F");
-  document.setDrawColor(...mixWithWhite(accent, 0.55));
+  if (isEditorial) document.rect(12, 12, pageWidth - 24, 62, "F");
+  else document.roundedRect(12, 12, pageWidth - 24, 62, 7, 7, "F");
+  document.setDrawColor(...mixColors(accent, background, 0.55));
   document.setLineWidth(0.25);
-  document.circle(pageWidth - 27, 38, 23, "S");
-  document.circle(pageWidth - 7, 20, 22, "S");
+  if (!isEditorial) {
+    document.circle(pageWidth - 27, 38, 23, "S");
+    document.circle(pageWidth - 7, 20, 22, "S");
+  }
   const textX = portfolio.avatarDataUrl ? 57 : 24;
   if (portfolio.avatarDataUrl) {
     try {
@@ -81,20 +104,20 @@ export async function exportPortfolioPdf(portfolio: PortfolioData) {
       const photoSize = 26;
       const photoX = 21;
       const photoY = 30;
-      document.setFillColor(255, 255, 255);
+      document.setFillColor(...background);
       document.circle(photoX + photoSize / 2, photoY + photoSize / 2, photoSize / 2 + 1.4, "F");
       document.addImage(avatar, "PNG", photoX, photoY, photoSize, photoSize);
     } catch { /* The exported PDF remains valid without an unsupported image. */ }
   }
-  document.setFont("helvetica", "normal");
+  document.setFont(font, "normal");
   document.setTextColor(...accent);
   document.setFontSize(8);
   document.text("P O R T F Ó L I O   P R O F I S S I O N A L", textX, 32);
-  document.setTextColor(24, 24, 27);
-  document.setFont("helvetica", "bold");
+  document.setTextColor(...foreground);
+  document.setFont(font, "bold");
   document.setFontSize(25);
   document.text(portfolio.name, textX, 49);
-  document.setFont("helvetica", "normal");
+  document.setFont(font, "normal");
   document.setFontSize(9);
   document.setTextColor(...accent);
   document.text(`github.com/${portfolio.githubUsername}`, textX, 60);
@@ -108,8 +131,8 @@ export async function exportPortfolioPdf(portfolio: PortfolioData) {
     title("Projetos selecionados");
     portfolio.repos.forEach((repo) => {
       nextLine(16);
-      document.setFontSize(11); document.setTextColor(24, 24, 27); document.text(repo.name, margin, cursorY); cursorY += 5;
-      write(`${repo.language ?? "Projeto"} — ${repo.description ?? "Sem descrição fornecida."}`, 9, [82, 82, 91]);
+      document.setFontSize(11); document.setTextColor(...foreground); document.text(repo.name, margin, cursorY); cursorY += 5;
+      write(`${repo.language ?? "Projeto"} — ${repo.description ?? "Sem descrição fornecida."}`, 9, muted);
       write(repo.html_url, 8, accent);
     });
   }

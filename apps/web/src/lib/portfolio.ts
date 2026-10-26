@@ -12,6 +12,7 @@ export type PortfolioAppearance = {
   mode: "dark" | "light";
   accent: string;
   font?: "display" | "clean" | "editorial" | "mono";
+  layout?: "modern" | "editorial";
 };
 
 export const portfolioFontOptions = {
@@ -35,4 +36,12 @@ export type PortfolioData = {
   repos: GitHubRepo[];
 };
 
-export const portfolioStorageKey = "myportfolio:portfolio";
+let currentPortfolio: PortfolioData | null = null;
+
+export function getCurrentPortfolio() {
+  return currentPortfolio;
+}
+
+export function setCurrentPortfolio(portfolio: PortfolioData | null) {
+  currentPortfolio = portfolio;
+}
